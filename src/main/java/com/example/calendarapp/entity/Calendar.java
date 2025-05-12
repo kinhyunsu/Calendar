@@ -1,11 +1,13 @@
-package com.example.calendarapp.dto;
+package com.example.calendarapp.entity;
 
-import lombok.Getter;
+
+import jakarta.persistence.Entity;
 
 import java.time.LocalDateTime;
 
-@Getter
-public class CalendarResponseDto {
+@Entity
+
+public class Calendar {
 
     private Long id;
 

@@ -12,12 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CalendarController {
 
-    private final Map<String, Calendar> calendars = new HashMap<>();
 
-    public ResponseEntity<CalendarResponseDto> createCalendar(@RequestBody CalendarResponseDto calendarResponseDto) {
-
-        Calendar calendar = new Calendar(calendarResponseDto.get)
-    }
 
 
 
