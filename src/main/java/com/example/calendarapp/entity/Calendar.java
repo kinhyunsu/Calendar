@@ -19,13 +19,19 @@ public class Calendar {
     private LocalDateTime updatedAt;
 
 
-    public Calendar(String title, String content) {
+    public Calendar(String title, String content, String user, String password) {
         this.title = title;
         this.content = content;
+        this.user = user;
+        this.password = password;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
     }
+
+    public void updateTitle(String title) {this.title = title;}
 }

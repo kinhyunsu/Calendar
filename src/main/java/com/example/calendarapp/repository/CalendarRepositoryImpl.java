@@ -1,6 +1,7 @@
 package com.example.calendarapp.repository;
 
 import com.example.calendarapp.dto.CalendarResponseDto;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -12,6 +13,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import com.example.calendarapp.entity.Calendar;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.sql.DataSource;
 
@@ -28,15 +30,15 @@ public class CalendarRepositoryImpl implements CalendarRepository {
     @Override
     public CalendarResponseDto saveCalendar(Calendar calendar) {
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-        jdbcInsert.withTableName("calendar").usingGeneratedKeyColumns("id");
+        jdbcInsert.withTableName("schedule").usingGeneratedKeyColumns("id");
 
-        Map<String, Object> parameters =new HashMap<>();
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put("title", calendar.getTitle());
         parameters.put("content", calendar.getContent());
         parameters.put("user", calendar.getUser());
         parameters.put("password", calendar.getPassword());
-        parameters.put("created_at", calendar.getCreatedAt());
-        parameters.put("updated_at", calendar.getUpdatedAt());
+        parameters.put("createAt", calendar.getCreatedAt());
+        parameters.put("updateAt", calendar.getUpdatedAt());
 
         Number key = jdbcInsert.executeAndReturnKey(new MapSqlParameterSource(parameters));
 
@@ -46,30 +48,63 @@ public class CalendarRepositoryImpl implements CalendarRepository {
 
     @Override
     public List<CalendarResponseDto> findAllCalendar() {
-        return jdbcTemplate.query("select * from calendar", calendarRowMapper());
+        return jdbcTemplate.query("select * from schedule", calendarRowMapperV2());
+    }
+
+
+
+    @Override
+    public Calendar findCalendarByIdOrThrow(Long id) {
+        List<Calendar> result = jdbcTemplate.query("select * from schedule where scheduledid = ?", calendarRowMapper(), id);
+        return result.stream().findAny().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found id = " + id));
     }
 
     @Override
-    public Calendar findCalendarById(Long id) {
-        return calendarList.get(id);
+    public int updateCalendar(Long id, String title, String content) {
+        return jdbcTemplate.update("update schedule set title = ?, content = ? where scheduledid = ?", title, content, id);
     }
 
     @Override
-    public void deletCalendar(Long id) {
-        calendarList.remove(id);
+    public int updateTitle(Long id, String title, String content) {
+        return jdbcTemplate.update("update schedule set title = ? where scheduledid = ?", title, id);
     }
+
+    @Override
+    public int deleteCalendar(Long id) {
+        return jdbcTemplate.update("delete from schedule where scheduledid = ?", id);
+    }
+
 
     private RowMapper<Calendar> calendarRowMapper() {
-        return new RowMapper<CalendarResponseDto>() {
+        return new RowMapper<Calendar>() {
             @Override
-            public CalendarResponseDto mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new CalendarResponseDto(
-                        rs.getLong("id"),
+            public Calendar mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return new Calendar(
+                        rs.getLong("scheduledid"),
                         rs.getString("title"),
                         rs.getString("content"),
+                        rs.getString("password"),
                         rs.getString("user"),
-                        rs.getTimestamp("updated_at").toLocalDateTime())
+                        rs.getTimestamp("createAt").toLocalDateTime(),
+                        rs.getTimestamp("updateAt").toLocalDateTime()
+                );
             }
         };
     }
+
+    private RowMapper<CalendarResponseDto> calendarRowMapperV2() {
+        return new RowMapper<CalendarResponseDto>(){
+            @Override
+            public CalendarResponseDto mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return new CalendarResponseDto(
+                        rs.getLong("scheduledid"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getString("user"),
+                        rs.getTimestamp("updateAt").toLocalDateTime()
+                );
+            }
+        };
+    }
+
 }

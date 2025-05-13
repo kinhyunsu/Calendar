@@ -6,6 +6,7 @@ import com.example.calendarapp.dto.CalendarResponseDto;
 import com.example.calendarapp.repository.CalendarRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.calendarapp.entity.Calendar;
@@ -20,10 +21,11 @@ public class CalendarServiceImpl implements CalendarService{
         this.calendarRepository = calendarRepository;
     }
 
+
     @Override
     public CalendarResponseDto saveCalendar(CalendarRequestDto dto) {
 
-        Calendar calendar = new Calendar(dto.getTitle(), dto.getContent());
+        Calendar calendar = new Calendar(dto.getTitle(), dto.getContent(), dto.getUser(), dto.getPassword());
 
         return calendarRepository.saveCalendar(calendar);
     }
@@ -32,54 +34,83 @@ public class CalendarServiceImpl implements CalendarService{
     @Override
     public List<CalendarResponseDto> findAllCalendar() {
 
-        return calendarRepository.findAllCalnedar();
+
+        return calendarRepository.findAllCalendar();
     }
+
+
+
+
+
+
 
     @Override
     public CalendarResponseDto findCalendarById(Long id) {
 
-        Calendar calendar = calendarRepository.findCalendarById(id);
+        Calendar calendar = calendarRepository.findCalendarByIdOrThrow(id);
 
         return new CalendarResponseDto(calendar);
     }
 
+
+
+
+    @Transactional
     @Override
     public CalendarResponseDto updateCalendar(Long id, String title, String content) {
 
-        Calendar calendar = calendarRepository.findCalendarById(id);
-
-        if (calendar == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exist id = " + id);
-        }
-
-        if (title == null || contents != null) {
+        if (title == null || content != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "title or contents is null");
         }
 
-        calendar.updateCalendar(calendar);
+        int updatedRow = calendarRepository.updateCalendar(id, title, content);
+
+        if (updatedRow == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exist id = " + id);
+        }
+
+        Calendar calendar = calendarRepository.findCalendarByIdOrThrow(id);
+
         return new CalendarResponseDto(calendar);
     }
 
+
+
+
+    @Transactional
     @Override
     public CalendarResponseDto updateTitle(Long id, String title, String content) {
 
-        Calendar calendar = calendarRepository.findCalendarById(id);
-        if (calendar == null || content != null) {
+
+        if (title == null || content != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "title or contents is null");
         }
 
-        calendar.updateTitle(calendar);
+        int updatedRow = calendarRepository.updateTitle(id, title, content);
+
+        if (updatedRow == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exist id = " + id);
+        }
+
+        Calendar calendar = calendarRepository.findCalendarByIdOrThrow(id);
 
         return new CalendarResponseDto(calendar);
     }
 
+
+
+
     @Override
     public void deleteCalendar(Long id) {
-        if (calendar == null) {
+
+        int deletedRow = calendarRepository.deleteCalendar(id);
+
+        if (deletedRow == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exist id = " + id);
         }
 
-        calendarRepository.deletCalendar(id);
+
+
 
     }
 }

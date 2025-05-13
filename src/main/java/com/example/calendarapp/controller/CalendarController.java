@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@ReadingConverter
+@RestController
 @RequestMapping("/calendar")
 public class CalendarController {
 
