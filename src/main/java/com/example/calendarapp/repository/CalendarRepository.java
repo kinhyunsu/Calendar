@@ -1,12 +1,17 @@
 package com.example.calendarapp.repository;
 
-import java.time.LocalDateTime;
+import com.example.calendarapp.dto.CalendarResponseDto;
+import com.example.calendarapp.entity.Calendar;
+
 import java.util.List;
 
-public class CalendarRepository {
+public interface CalendarRepository {
 
+    CalendarResponseDto saveCalendar(Calendar calendar);
 
+    List<CalendarResponseDto> findAllCalendar();
 
+    Calendar findCalendarById(Long id);
 
-
+    void deletCalendar(Long id);
 }
