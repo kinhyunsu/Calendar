@@ -54,12 +54,11 @@ public class CalendarServiceImpl implements CalendarService{
 
 
 
-
     @Transactional
     @Override
     public CalendarResponseDto updateCalendar(Long id, String title, String content) {
 
-        if (title == null || content != null) {
+        if (title == null || content == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "title or contents is null");
         }
 
